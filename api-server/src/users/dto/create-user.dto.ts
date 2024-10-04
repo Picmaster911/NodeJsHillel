@@ -5,12 +5,9 @@ import {
   MaxLength,
   IsEmail,
 } from 'class-validator';
-import { IUser } from '../interfaces/user.interface';
+import { ICreateUserInput } from '../interfaces/create-user-input.interface';
 
-export class CreateUserDto implements IUser {
-  @IsInt()
-  id: number;
-
+export class CreateUserDto implements ICreateUserInput {
   @IsString()
   @MinLength(3)
   @MaxLength(20)
