@@ -3,6 +3,13 @@
 /node_modules
 /build
 
+# MongoDB
+mongodb/
+
+# Docker Compose
+docker-compose.override.yml
+docker-compose.local.yml
+
 # Logs
 logs
 *.log
