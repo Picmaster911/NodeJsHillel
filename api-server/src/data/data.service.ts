@@ -6,16 +6,18 @@ export class DataService {
   private users: IUser[] = [
     {
       id: 1,
-      username: 'user1',
+      username: 'test',
       email: 'user1@example.com',
-      password: 'das',
+      password:
+        '$argon2id$v=19$m=65536,t=3,p=4$Q4nuVozjkR6a5BASX4DPZw$1B+r05J2puNdr3L7B50ivRM56ml8STYN8Tt+wVBoPsQ', //qwerty
       age: 25,
     },
     {
       id: 2,
       username: 'user2',
       email: 'user2@example.com',
-      password: 'das',
+      password:
+        '$argon2id$v=19$m=65536,t=3,p=4$+4d7l3rCTd0bw0qi9jcKlw$GaqKd91kakFc6CzNMEgA5skJf88rmPkQGxW8xNqD2v8', //123456
       age: 30,
     },
     {

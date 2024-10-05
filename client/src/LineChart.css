@@ -1,0 +1,14 @@
+.line-chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 80vh; /* Занимает всю высоту экрана */
+  padding: 20px; /* Отступы для улучшения внешнего вида */
+  box-sizing: border-box; /* Включение отступов в размер контейнера */
+}
+
+.line-chart {
+  width: 100%;
+  height: 100%;
+}
