@@ -21,7 +21,6 @@ export class UsersService {
 
   findOneAndUpdate(id: number, updateBody: IUpdateUserPartialInput): IUser {
     const user = this.findOne(id);
-    console.log(user);
     return this.updatePartially(user.id, updateBody);
   }
 
