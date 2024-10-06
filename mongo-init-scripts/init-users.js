@@ -75,4 +75,15 @@ db.users.insertMany([
       },
 ]);
 
+db.createUser({
+  user: "root",  // Имя пользователя
+  pwd: "password",    // Пароль пользователя
+  roles: [
+    {
+      role: "readWrite",   // Права на чтение и запись
+      db: "app-base"       // Название базы данных
+    }
+  ]
+});
+
 print('Database initialized with 10 users.');
