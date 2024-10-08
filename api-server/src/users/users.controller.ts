@@ -12,6 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUser } from './interfaces/user.interface';
+import { User } from './schemas/user.schema';
 
 @Controller('users')
 export class UsersController {
@@ -43,5 +44,10 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
+  }
+
+  @Post('db')
+  async createDb(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.usersService.createDb(createUserDto);
   }
 }

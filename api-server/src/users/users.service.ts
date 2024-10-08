@@ -8,10 +8,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { DataService } from '../data/data.service';
 import { IUser } from './interfaces/user.interface';
 import { IUpdateUserPartialInput } from './interfaces/update-user-partial-input.interface';
+import { User } from './schemas/user.schema';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly dataService: DataService) {}
+  constructor(
+    private readonly dataService: DataService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
   create(createUserDto: CreateUserDto): IUser {
     const allUser = this.dataService.getAllUsers();
     const newUser = { id: allUser.length + 1, ...createUserDto };
@@ -21,6 +27,7 @@ export class UsersService {
 
   findOneAndUpdate(id: number, updateBody: IUpdateUserPartialInput): IUser {
     const user = this.findOne(id);
+    console.log(user);
     return this.updatePartially(user.id, updateBody);
   }
 
@@ -75,5 +82,10 @@ export class UsersService {
     const updatedUser = { ...collectionUser[userIndex], ...dto };
     collectionUser[userIndex] = updatedUser;
     return updatedUser;
+  }
+
+  async createDb(createUserDto: CreateUserDto): Promise<User> {
+    const createdUser = await this.userModel.create(createUserDto);
+    return createdUser;
   }
 }

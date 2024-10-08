@@ -7,9 +7,15 @@ import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
 import { UsersService } from 'src/users/users.service';
 import { AccessTokenStrategy } from './strategy/access-token.strategy';
 import { DataService } from 'src/data/data.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 
 @Module({
-  imports: [ConfigModule, JwtModule.register({})],
+  imports: [
+    ConfigModule,
+    JwtModule.register({}),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
