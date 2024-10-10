@@ -7,16 +7,22 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Inject,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUser } from './interfaces/user.interface';
-import { User } from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
+import { AbstractRepository } from 'src/dbcontext/db.abstract.base';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject('DatabaseService')
+    private readonly databaseService: AbstractRepository<User, UserDocument>,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto): IUser {
@@ -46,8 +52,13 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Post('db')
+  @Post('dbadd')
   async createDb(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.createDb(createUserDto);
+    return this.databaseService.create(createUserDto as UserDocument);
+  }
+  @Post('dbAll')
+  async getAll(): Promise<User[]> {
+    const newUser = this.databaseService.getAll();
+    return newUser;
   }
 }

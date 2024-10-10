@@ -6,7 +6,7 @@ import { DataModule } from './data/data.module';
 import { LogerIpMiddlewareModule } from './loger-ip-middleware/loger-ip-middleware.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+// import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     UsersModule,
     DataModule,
     AuthModule,
-    MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING),
+    // MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING),
   ],
   controllers: [AppController],
   providers: [AppService],
