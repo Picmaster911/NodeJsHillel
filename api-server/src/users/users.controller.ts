@@ -30,9 +30,13 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  findAll(): IUser[] {
-    return this.usersService.findAll();
+  @Post('getall')
+  async getAll(): Promise<any[]> {
+    const newUser = await this.databaseService.getAll(
+      MongooseModelsMapEnum.USER,
+    );
+    console.log(newUser);
+    return newUser;
   }
 
   @Get(':id')
@@ -59,10 +63,5 @@ export class UsersController {
       MongooseModelsMapEnum.USER,
       createUserDto as UserDocument,
     );
-  }
-  @Post('dbAll')
-  async getAll(): Promise<any[]> {
-    const newUser = this.databaseService.getAll(MongooseModelsMapEnum.USER);
-    return newUser;
   }
 }
