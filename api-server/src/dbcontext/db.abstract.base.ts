@@ -1,8 +1,12 @@
-export abstract class AbstractRepository<TCreate, TEntity> {
-  abstract create(item: TCreate): Promise<TEntity>;
-  abstract getAll(): Promise<TEntity[]>;
-  abstract getById(id: string): Promise<TEntity> | null;
-  abstract update(id: string, item: Partial<TCreate>): Promise<TEntity> | null;
-  abstract delete(id: string): Promise<boolean>;
+export abstract class AbstractRepository {
+  abstract create(table: string, data: any): Promise<any>;
+  abstract getAll(table: string): Promise<any[]>;
+  abstract getById(table: string, id: string): Promise<any> | null;
+  abstract update(
+    table: string,
+    id: string,
+    item: Partial<any>,
+  ): Promise<any> | null;
+  abstract delete(table: string, id: string): Promise<boolean>;
   abstract connect(): Promise<void>;
 }

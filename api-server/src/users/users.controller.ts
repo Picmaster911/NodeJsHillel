@@ -15,13 +15,14 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { IUser } from './interfaces/user.interface';
 import { User, UserDocument } from './schemas/user.schema';
 import { AbstractRepository } from 'src/dbcontext/db.abstract.base';
+import { MongooseModelsMapEnum } from 'src/dbcontext/types/mongo.model.map.enum';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     @Inject('DatabaseService')
-    private readonly databaseService: AbstractRepository<User, UserDocument>,
+    private readonly databaseService: AbstractRepository,
   ) {}
 
   @Post()
@@ -54,11 +55,14 @@ export class UsersController {
 
   @Post('dbadd')
   async createDb(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.databaseService.create(createUserDto as UserDocument);
+    return this.databaseService.create(
+      MongooseModelsMapEnum.USER,
+      createUserDto as UserDocument,
+    );
   }
   @Post('dbAll')
-  async getAll(): Promise<User[]> {
-    const newUser = this.databaseService.getAll();
+  async getAll(): Promise<any[]> {
+    const newUser = this.databaseService.getAll(MongooseModelsMapEnum.USER);
     return newUser;
   }
 }

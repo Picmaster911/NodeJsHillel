@@ -1,60 +1,69 @@
-import mongoose, {
-  HydratedDocument,
-  Model,
-  Mongoose,
-  UpdateQuery,
-} from 'mongoose';
+import mongoose, { Model, Mongoose } from 'mongoose';
 import { AbstractRepository } from './db.abstract.base';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { MongooseModelsMapEnum } from './types/mongo.model.map.enum';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UserModel } from './models/user.model';
 
 @Injectable()
-export class MongoRepository<
-  TCreate,
-  TEntity extends HydratedDocument<any>,
-> extends AbstractRepository<TCreate, TEntity> {
-  private readonly model: Model<TEntity>;
+export class MongoRepository extends AbstractRepository {
+  private readonly logger = new Logger(MongoRepository.name);
   private mongoUri: string;
   private client: Mongoose;
-  private readonly logger = new Logger(MongoRepository.name);
 
-  constructor(configService: ConfigService, model: Model<TEntity>) {
+  constructor(configService: ConfigService) {
     super();
-    this.model = model;
     this.mongoUri = configService.get<string>('MONGO_CONNECTION_STRING');
   }
 
   async connect(): Promise<void> {
+    this.logger.log(this.mongoUri);
     this.client = await mongoose.connect(this.mongoUri);
     this.logger.log('Connected to MongoDB');
   }
-  createDocument(data: Partial<TCreate>): TEntity {
-    return new this.model(data);
-  }
-  async create(item: Partial<TCreate>): Promise<TEntity> {
-    const createdItem = new this.model(item);
-    return createdItem.save();
-  }
-  async getAll(): Promise<TEntity[]> {
-    return this.model.find().exec();
+
+  async create(table: MongooseModelsMapEnum, data: CreateUserDto) {
+    const model = this.getModel(table);
+    return new (await model)(data);
   }
 
-  async getById(id: string): Promise<TEntity> {
-    return this.model.findById(id).exec();
+  async getAll(table: MongooseModelsMapEnum): Promise<any[]> {
+    const model = this.getModel(table);
+    return (await model).find().exec();
   }
 
-  async update(id: string, item: Partial<TCreate>): Promise<TEntity | null> {
-    const updateQuery: UpdateQuery<TEntity> = {
-      $set: item as unknown as Partial<TEntity>,
-    } as UpdateQuery<TEntity>;
-    const updatedItem = await this.model
-      .findByIdAndUpdate(id, updateQuery, { new: true })
+  async getById(table: MongooseModelsMapEnum, id: string): Promise<any> {
+    const model = this.getModel(table);
+    return (await model).findById(id).exec();
+  }
+
+  async update(
+    table: MongooseModelsMapEnum,
+    id: string,
+    item: any,
+  ): Promise<any | null> {
+    const model = this.getModel(table);
+    const updatedItem = await (await model)
+      .findByIdAndUpdate(id, item, { new: true })
       .exec();
-    return updatedItem ? (updatedItem as unknown as TEntity) : null;
+    return updatedItem ? updatedItem : null;
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await this.model.findByIdAndDelete(id).exec();
+  async delete(table: MongooseModelsMapEnum, id: string): Promise<boolean> {
+    const model = this.getModel(table);
+    const result = await (await model).findByIdAndDelete(id).exec();
     return !!result;
+  }
+
+  private async getModel(table: MongooseModelsMapEnum): Promise<Model<any>> {
+    await this.connect();
+    switch (table) {
+      case MongooseModelsMapEnum.USER:
+        return UserModel;
+
+      default:
+        throw new Error('Unknown table');
+    }
   }
 }

@@ -1,63 +1,91 @@
-import {
-  Repository,
-  DeepPartial,
-  DeleteResult,
-  FindOptionsWhere,
-} from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AbstractRepository } from './db.abstract.base';
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
-import { BaseEntity } from './contracts/base.entety.itnerface';
+import { ConfigService } from '@nestjs/config';
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { PostgresEntityMapEnum } from './types/typeorm.model.map.enum';
+import { DBType } from './database-type.enum';
+import { UserOrm } from 'src/users/entities/user.type.orm';
 
 @Injectable()
-export class PostgresRepository<
-  TCreate,
-  TEntity extends BaseEntity,
-> extends AbstractRepository<TCreate, TEntity> {
-  connect(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  private readonly repository: Repository<TEntity>;
+export class PostgresRepository extends AbstractRepository {
+  private dataSource: DataSource;
 
-  constructor(configService: ConfigService, repository: Repository<TEntity>) {
+  constructor(configService: ConfigService) {
     super();
-    this.repository = repository;
+
+    this.dataSource = new DataSource({
+      type: DBType.POSTGRES,
+      host: configService.get<string>('postgres.POSTGRES_HOST'),
+      port: configService.get<number>('postgres.POSTGRES_PORT'),
+      username: configService.get<string>('postgres.POSTGRES_USER'),
+      password: configService.get<string>('postgres.POSTGRES_PASSWORD'),
+      database: configService.get<string>('postgres.POSTGRES_DB'),
+    });
   }
 
-  async create(data: DeepPartial<TCreate>): Promise<TEntity> {
-    const entity = this.repository.create(data as DeepPartial<TEntity>);
-    return this.repository.save(entity);
+  async connect(): Promise<void> {
+    try {
+      await this.dataSource.initialize();
+      console.log('Connected to Postgres');
+    } catch (error) {
+      console.error('Error connecting to Postgres:', error);
+    }
   }
 
-  async getAll(): Promise<TEntity[]> {
-    return this.repository.find();
+  async disconnect(): Promise<void> {
+    try {
+      await this.dataSource.destroy();
+      console.log('Disconnected from Postgres');
+    } catch (error) {
+      console.error('Error disconnecting from Postgres:', error);
+    }
   }
 
-  async getById(id: string): Promise<TEntity | null> {
-    return (
-      this.repository.findOne({
-        where: { id } as unknown as FindOptionsWhere<TEntity>,
-      }) || null
-    );
+  async create(table: PostgresEntityMapEnum, data: any): Promise<void> {
+    const repository = this.getRepository(table);
+    const entity = repository.create(data);
+    await repository.save(entity);
+    console.log('Record inserted into Postgres');
+  }
+
+  async getById(table: PostgresEntityMapEnum, query: any): Promise<any> {
+    const repository = this.getRepository(table);
+    const result = await repository.findOneBy(query); // Используйте findOne или findOneBy
+    return result;
+  }
+
+  async getAll(table: PostgresEntityMapEnum): Promise<any[]> {
+    const repository = this.getRepository(table); // Получаем репозиторий для указанной таблицы
+    return repository.find(); // Возвращаем все записи из таблицы
   }
 
   async update(
+    table: PostgresEntityMapEnum,
     id: string,
-    updateData: Partial<TCreate>,
-  ): Promise<TEntity | null> {
-    const entity = await this.repository.findOne({
-      where: { id } as unknown as FindOptionsWhere<TEntity>,
-    });
-    if (!entity) {
-      return null;
-    }
-    Object.assign(entity, updateData);
+    item: Partial<any>,
+  ): Promise<any | null> {
+    const repository = this.getRepository(table);
+    await repository.update(id, item); // Обновление записи
+    return this.getById(table, id); // Возвращаем обновленную запись
+  }
+  async delete(table: PostgresEntityMapEnum, id: string): Promise<boolean> {
+    const repository = this.getRepository(table);
+    const result = await repository.delete(id); // Удаление записи
+    return result.affected !== undefined && result.affected > 0;
+  }
+  private getEntity(table: PostgresEntityMapEnum): EntityClassOrSchema {
+    switch (table) {
+      case PostgresEntityMapEnum.USER:
+        return UserOrm;
 
-    return this.repository.save(entity);
+      default:
+        throw new Error('Unknown entity');
+    }
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result: DeleteResult = await this.repository.delete(id);
-    return result.affected !== undefined && result.affected > 0;
+  private getRepository(table: PostgresEntityMapEnum): Repository<any> {
+    const entity = this.getEntity(table);
+    return this.dataSource.getRepository(entity);
   }
 }
