@@ -18,12 +18,15 @@ function BasicCardItem({ userItem }) {
     <Card sx={{ minWidth: 275, margin: 3, alignContent:'center' }}>
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="red" gutterBottom>
-           User Id - {userItem.id}
+           User Id - {userItem._id}
         </Typography>
         <Typography variant="h5" component="div">
           <Box>
             {userItem.userItemname}
           </Box>
+        </Typography>
+        <Typography variant="body2">
+          UserName - {userItem.username}
         </Typography>
         <Typography variant="body2">
           Email - {userItem.email}

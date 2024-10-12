@@ -8,7 +8,7 @@ function MainPage() {
 
   const apiCall = () => {
     axios
-      .get("api/users/")
+      .post("api/users/getall")
       .then((res) => {
         setUsers(res.data);
       })

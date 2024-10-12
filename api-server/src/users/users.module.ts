@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { DataService } from 'src/data/data.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './schemas/user.schema';
+import { ConfigModule } from '@nestjs/config';
+import { UsersService } from './users.service';
+import { DatabaseAbstractionModule } from 'src/dbcontext/database-abstraction.module';
+import { DBType } from 'src/dbcontext/database-type.enum';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
+  imports: [ConfigModule, DatabaseAbstractionModule.register(DBType.MONGODB)],
   controllers: [UsersController],
   providers: [UsersService, DataService],
 })

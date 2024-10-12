@@ -7,25 +7,36 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Inject,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { IUser } from './interfaces/user.interface';
-import { User } from './schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
+import { AbstractRepository } from 'src/dbcontext/db.abstract.base';
+import { MongooseModelsMapEnum } from 'src/dbcontext/types/mongo.model.map.enum';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject('DatabaseService')
+    private readonly databaseService: AbstractRepository,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto): IUser {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  findAll(): IUser[] {
-    return this.usersService.findAll();
+  @Post('getall')
+  async getAll(): Promise<any[]> {
+    const newUser = await this.databaseService.getAll(
+      MongooseModelsMapEnum.USER,
+    );
+    console.log(newUser);
+    return newUser;
   }
 
   @Get(':id')
@@ -46,8 +57,11 @@ export class UsersController {
     return this.usersService.remove(id);
   }
 
-  @Post('db')
+  @Post('dbadd')
   async createDb(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.createDb(createUserDto);
+    return this.databaseService.create(
+      MongooseModelsMapEnum.USER,
+      createUserDto as UserDocument,
+    );
   }
 }
