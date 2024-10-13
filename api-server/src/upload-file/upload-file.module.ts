@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { UploadFileService } from './upload-file.service';
 import { UploadFileController } from './upload-file.controller';
 
@@ -6,4 +6,10 @@ import { UploadFileController } from './upload-file.controller';
   controllers: [UploadFileController],
   providers: [UploadFileService],
 })
-export class UploadFileModule {}
+export class UploadFileModule {
+  private readonly logger = new Logger(UploadFileModule.name);
+
+  constructor() {
+    this.logger.log('UploadFileModule initialized');
+  }
+}

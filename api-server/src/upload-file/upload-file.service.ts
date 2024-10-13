@@ -1,24 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { createWriteStream } from 'fs';
+import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 
 @Injectable()
 export class UploadFileService {
-  saveFile(file: Express.Multer.File) {
-    const filePath = join(__dirname, '..', 'uploads', file.originalname);
-    const writeStream = createWriteStream(filePath);
-    return new Promise((resolve, reject) => {
-      writeStream.write(file.buffer);
-      writeStream.end();
+  saveFiles(files: Array<Express.Multer.File>): Promise<string[]> {
+    const fileSavePromises = files.map((file) => {
+      const uploadDir = join(__dirname, '..', 'uploads');
+      if (!existsSync(uploadDir)) {
+        mkdirSync(uploadDir, { recursive: true });
+      }
+      const filePath = join(uploadDir, file.originalname);
+      const writeStream = createWriteStream(filePath);
+      return new Promise<string>((resolve, reject) => {
+        writeStream.write(file.buffer);
+        writeStream.end();
 
-      writeStream.on('finish', () => {
-        resolve('Finish');
-      });
+        writeStream.on('finish', () => {
+          resolve('Finish');
+        });
 
-      writeStream.on('error', (err) => {
-        reject(err);
+        writeStream.on('error', (err) => {
+          reject(err);
+        });
       });
     });
+
+    return Promise.all(fileSavePromises);
   }
 
   async saveFileStream(req: any): Promise<void> {
