@@ -6,6 +6,7 @@ import { DataModule } from './data/data.module';
 import { LogerIpMiddlewareModule } from './loger-ip-middleware/loger-ip-middleware.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { UploadFileModule } from './upload-file/upload-file.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     DataModule,
     AuthModule,
+    UploadFileModule,
   ],
 
   controllers: [AppController],
